@@ -8,6 +8,8 @@
 
 Use **Demo Mode** to explore the app without a Hetzner API token. Live API mode requires a Hetzner Cloud API token.
 
+On Windows, select **RDP** beside a server's IPv4 address to download a Remote Desktop connection file, then open the downloaded file to connect with `mstsc.exe`. Browsers cannot launch local programs directly.
+
 ## Other commands
 
 - `npm run build` creates a production build in `dist`.

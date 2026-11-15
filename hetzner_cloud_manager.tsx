@@ -2539,19 +2539,31 @@ export default function App() {
                               {/* Network & Location Row */}
                               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-300">
                                 {ipv4 && (
-                                  <button
-                                    onClick={() => handleCopy(ipv4, 'IPv4 Copied')}
-                                    className="inline-flex items-center gap-1.5 font-mono bg-slate-950 hover:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-800 text-slate-200 transition"
-                                    title="Click to copy IPv4"
-                                  >
-                                    <Wifi className="w-3.5 h-3.5 text-emerald-400" />
-                                    <span>{ipv4}</span>
-                                    {copiedText === ipv4 ? (
-                                      <Check className="w-3 h-3 text-emerald-400" />
-                                    ) : (
-                                      <Copy className="w-3 h-3 text-slate-500" />
-                                    )}
-                                  </button>
+                                  <>
+                                    <button
+                                      onClick={() => handleCopy(ipv4, 'IPv4 Copied')}
+                                      className="inline-flex items-center gap-1.5 font-mono bg-slate-950 hover:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-800 text-slate-200 transition"
+                                      title="Click to copy IPv4"
+                                    >
+                                      <Wifi className="w-3.5 h-3.5 text-emerald-400" />
+                                      <span>{ipv4}</span>
+                                      {copiedText === ipv4 ? (
+                                        <Check className="w-3 h-3 text-emerald-400" />
+                                      ) : (
+                                        <Copy className="w-3 h-3 text-slate-500" />
+                                      )}
+                                    </button>
+                                    <a
+                                      href={`data:application/x-rdp;charset=utf-8,${encodeURIComponent(
+                                        `full address:s:${ipv4}\nprompt for credentials:i:1\n`
+                                      )}`}
+                                      download={`server-${srv.id}.rdp`}
+                                      className="inline-flex items-center rounded-lg border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 font-semibold text-sky-300 transition hover:border-sky-400/50 hover:bg-sky-500/20"
+                                      title="Download a Remote Desktop connection file for this server"
+                                    >
+                                      RDP
+                                    </a>
+                                  </>
                                 )}
 
                                 {ipv6 && (
