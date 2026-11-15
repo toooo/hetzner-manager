@@ -72,11 +72,14 @@ jobs:
           project_exists=false
 
           while true; do
-            projects="$(curl --fail-with-body --silent --show-error \
+            projects_response="$(curl --silent --show-error \
+              --write-out '\n%{http_code}' \
               --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-              "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects?page=$page&per_page=100")"
+              "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects?page=$page")"
+            status="${projects_response##*$'\n'}"
+            projects="${projects_response%$'\n'*}"
 
-            if ! jq -e '.success == true and (.result | type == "array")' <<< "$projects" >/dev/null; then
+            if (( status < 200 || status >= 300 )) || ! jq -e '.success == true and (.result | type == "array")' <<< "$projects" >/dev/null; then
               echo "::error::Could not list Cloudflare Pages projects."
               jq -r '.errors[]?.message // empty' <<< "$projects" >&2
               exit 1
