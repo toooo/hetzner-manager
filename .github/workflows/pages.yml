@@ -99,14 +99,17 @@ jobs:
             exit 0
           fi
 
-          created="$(curl --fail-with-body --silent --show-error \
+          created_response="$(curl --silent --show-error \
+            --write-out '\n%{http_code}' \
             --request POST \
             --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             --header "Content-Type: application/json" \
             --data '{"name":"hetzner-manager","production_branch":"main"}' \
             "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects")"
+          status="${created_response##*$'\n'}"
+          created="${created_response%$'\n'*}"
 
-          if ! jq -e '.success == true and .result.name == "hetzner-manager"' <<< "$created" >/dev/null; then
+          if (( status < 200 || status >= 300 )) || ! jq -e '.success == true and .result.name == "hetzner-manager"' <<< "$created" >/dev/null; then
             echo "::error::Could not create Cloudflare Pages project hetzner-manager."
             jq -r '.errors[]?.message // empty' <<< "$created" >&2
             exit 1
