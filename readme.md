@@ -19,9 +19,10 @@ The GitHub Actions workflow in `.github/workflows/pages.yml` builds every push a
 
 Before the first deployment:
 
-1. Create a Cloudflare Pages project using **Direct Upload**, named `hetzner-manager`, with `main` as its production branch.
-2. Create a Cloudflare API token with **Account / Cloudflare Pages / Edit** permission.
-3. In the GitHub repository settings, add Actions repository secrets named `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`. Do not commit or share the token.
-4. Push to `main` or run the **CI and Cloudflare Pages** workflow manually on `main`.
+1. Create a Cloudflare API token with **Account / Cloudflare Pages / Edit** permission.
+2. In the GitHub repository settings, add Actions repository secrets named `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`. Do not commit or share the token.
+3. Push to `main` or run the **CI and Cloudflare Pages** workflow manually on `main`.
+
+If the `hetzner-manager` Pages project does not exist in that account, the workflow creates it as a Direct Upload project with `main` as its production branch.
 
 The production site will be available at `https://hetzner-manager.pages.dev` if that Pages project name is available in your Cloudflare account.

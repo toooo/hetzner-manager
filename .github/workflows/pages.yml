@@ -62,6 +62,58 @@ jobs:
             exit 1
           fi
 
+      - name: Ensure Cloudflare Pages project exists
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          page=1
+          project_exists=false
+
+          while true; do
+            projects="$(curl --fail-with-body --silent --show-error \
+              --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects?page=$page&per_page=100")"
+
+            if ! jq -e '.success == true and (.result | type == "array")' <<< "$projects" >/dev/null; then
+              echo "::error::Could not list Cloudflare Pages projects."
+              jq -r '.errors[]?.message // empty' <<< "$projects" >&2
+              exit 1
+            fi
+
+            if jq -e --arg name "hetzner-manager" 'any(.result[]; .name == $name)' <<< "$projects" >/dev/null; then
+              project_exists=true
+              break
+            fi
+
+            total_pages="$(jq -r '.result_info.total_pages // 1' <<< "$projects")"
+            if (( page >= total_pages )); then
+              break
+            fi
+            page=$((page + 1))
+          done
+
+          if [[ "$project_exists" == true ]]; then
+            echo "Cloudflare Pages project hetzner-manager already exists."
+            exit 0
+          fi
+
+          created="$(curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            --header "Content-Type: application/json" \
+            --data '{"name":"hetzner-manager","production_branch":"main"}' \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects")"
+
+          if ! jq -e '.success == true and .result.name == "hetzner-manager"' <<< "$created" >/dev/null; then
+            echo "::error::Could not create Cloudflare Pages project hetzner-manager."
+            jq -r '.errors[]?.message // empty' <<< "$created" >&2
+            exit 1
+          fi
+
+          echo "Created Cloudflare Pages project hetzner-manager."
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v4
         with:
